@@ -31,7 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball Parameters")
 	float MaxDesiredVelocity = 10.f;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BallParamaters)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ball Paramaters")
 	float DistanceTravelled;
 	
 
@@ -70,6 +70,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsFalling;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsGameOver = false;
 	
 private:
 
@@ -91,7 +94,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters")
 	TSubclassOf<UUserWidget> GameplayHUD;
 
-	UUserWidget* HUD;
+	UGameplayWidget* HUD;
+
+	UPROPERTY(EditAnywhere, Category = "Ball Audio Parameters")
+	float HitSoundThreshold = 10.f;
 
 	UPROPERTY(EditAnywhere, Category = "Ball Parameters")
 	float ForceMultiplier = 7500.f;
@@ -120,7 +126,7 @@ private:
 	void OnRollAudioFinished();
 
 	UFUNCTION()
-	void OnBallHit();
+	void OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	bool FloorTrace(FVector InputLocation);
 };

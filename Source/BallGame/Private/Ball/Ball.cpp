@@ -12,6 +12,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Widgets/GameplayWidget.h"
 
 
 ABall::ABall()
@@ -21,6 +22,7 @@ ABall::ABall()
 	SimSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SetRootComponent(SimSphere);
 	SimSphere->SetSimulatePhysics(true);
+	SimSphere->SetNotifyRigidBodyCollision(true);
 	SimSphere->SetCollisionProfileName(TEXT("BlockAll"));
 	SimSphere->SetLinearDamping(0.5f);
 	SimSphere->SetAngularDamping(0.5f);
@@ -51,6 +53,7 @@ void ABall::BeginPlay()
 
 	//Binding Delegates
 	RollAudio->OnAudioFinished.AddDynamic(this, &ABall::OnRollAudioFinished);
+	SimSphere->OnComponentHit.AddDynamic(this, &ABall::OnBallHit);
 	
 	//Setting Distance travelled to 0 when the game starts
 	DistanceTravelled = 0.f;
@@ -67,12 +70,16 @@ void ABall::BeginPlay()
 	//Enable HUD Widget
 	if(GameplayHUD)
 	{
-		HUD = CreateWidget<UUserWidget>(GetWorld(), GameplayHUD);
+		HUD = CreateWidget<UGameplayWidget>(GetWorld(), GameplayHUD);
 		HUD->AddToViewport();
 	}
 
 	//Start Playing Roll Audio
 	RollAudio->Play();
+	RollAudio->SetVolumeMultiplier(0.f);
+
+	//Initializing Variables
+	bIsGameOver = false;
 	
 }
 void ABall::Tick(float DeltaTime)
@@ -132,12 +139,10 @@ void ABall::Pause(const FInputActionValue& Value)
 	if(UGameplayStatics::IsGamePaused(GetWorld()))
 	{
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
-		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Blue, TEXT("Unpaused!"));
 	}
 	else
 	{
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
-		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Blue, TEXT("Paused!"));
 	}
 }
 
@@ -198,9 +203,13 @@ void ABall::SetRollAudioIntensity()
 	const float CurrentVelocity = GetVelocity().Length() / 100.f;
 	const float AudioRatio = FMath::Clamp(CurrentVelocity/MaxDesiredVelocity*2.f, 0.f, 1.f);
 
-	if(RollSoundCurve)
+	if(RollSoundCurve && !bIsFalling)
 	{
 		RollAudio->SetVolumeMultiplier(RollSoundCurve->GetFloatValue(AudioRatio));
+	}
+	if(bIsFalling)
+	{
+		RollAudio->Stop();
 	}
 	
 }
@@ -210,8 +219,12 @@ void ABall::OnRollAudioFinished()
 	RollAudio->Play();
 }
 
-void ABall::OnBallHit()
+void ABall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if(NormalImpulse.Length()*100.f > HitSoundThreshold)
+	{
+		HitAudio->Play();
+	}
 	
 }
 
@@ -240,7 +253,23 @@ bool ABall::FloorTrace(FVector InputLocation)
 			bIsFalling = false;
 		}
 	}
+
+	static float FallTimer = 0.f;
+	FallTimer++;
+	
+	if(bIsFalling)
+	{
+		if(FallTimer >= 120.f && !bIsGameOver)
+		{
+			bIsGameOver = true;
+			UGameplayStatics::OpenLevel(GetWorld(), TEXT("TestingLevel"));
+		}
+	}
+
+	if(!bIsFalling)
+	{
+		FallTimer = 0.f;
+	}
 	
 	return bIsFalling;
 }
-
