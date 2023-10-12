@@ -4,15 +4,14 @@
 #include "Ball/Ball.h"
 
 #include "CineCameraComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "BallGame/BallGameGameModeBase.h"
 #include "Components/AudioComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Widgets/GameplayWidget.h"
 
 
 ABall::ABall()
@@ -67,21 +66,15 @@ void ABall::BeginPlay()
 		}
 	}
 
-	//Enable HUD Widget
-	if(GameplayHUD)
-	{
-		HUD = CreateWidget<UGameplayWidget>(GetWorld(), GameplayHUD);
-		HUD->AddToViewport();
-	}
-
 	//Start Playing Roll Audio
 	RollAudio->Play();
 	RollAudio->SetVolumeMultiplier(0.f);
 
 	//Initializing Variables
 	bIsGameOver = false;
-	
+	GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 }
+
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -262,7 +255,10 @@ bool ABall::FloorTrace(FVector InputLocation)
 		if(FallTimer >= 120.f && !bIsGameOver)
 		{
 			bIsGameOver = true;
-			UGameplayStatics::OpenLevel(GetWorld(), TEXT("TestingLevel"));
+			if(GameMode)
+			{
+				GameMode->GameOver();
+			}
 		}
 	}
 

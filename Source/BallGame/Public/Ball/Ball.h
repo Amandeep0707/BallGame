@@ -7,7 +7,6 @@
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
-class UGameplayWidget;
 class UAudioComponent;
 class UInputMappingContext;
 class UInputAction;
@@ -15,6 +14,7 @@ class USpringArmComponent;
 class UCineCameraComponent;
 class USphereComponent;
 class UCurveFloat;
+class ABallGameGameModeBase;
 
 UCLASS()
 class BALLGAME_API ABall : public APawn
@@ -27,12 +27,16 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
+	//Read Only Variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball Parameters")
 	float MaxDesiredVelocity = 10.f;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ball Paramaters")
 	float DistanceTravelled;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsGameOver = false;
 	
 
 protected:
@@ -68,11 +72,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SimSphere;
 
+	//Read Only Variables
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsFalling;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsGameOver = false;
 	
 private:
 
@@ -81,6 +83,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCineCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "GameData")
+	ABallGameGameModeBase* GameMode;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Audio Parameters")
 	UAudioComponent* RollAudio;
@@ -91,11 +96,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Audio Parameters")
 	UCurveFloat* RollSoundCurve;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters")
-	TSubclassOf<UUserWidget> GameplayHUD;
-
-	UGameplayWidget* HUD;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Ball Audio Parameters")
 	float HitSoundThreshold = 10.f;
 
