@@ -23,6 +23,7 @@ void UGameplayWidget::NativeConstruct()
 	{
 		SetVisibility(ESlateVisibility::Hidden);
 	}
+	
 }
 
 void UGameplayWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)

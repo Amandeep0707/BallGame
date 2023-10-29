@@ -4,14 +4,12 @@
 #include "Ball/Ball.h"
 
 #include "CineCameraComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "BallGame/BallGameGameModeBase.h"
 #include "Components/AudioComponent.h"
-#include "Components/InputComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
 
 
 ABall::ABall()
@@ -25,6 +23,7 @@ ABall::ABall()
 	SimSphere->SetCollisionProfileName(TEXT("BlockAll"));
 	SimSphere->SetLinearDamping(0.5f);
 	SimSphere->SetAngularDamping(0.5f);
+	SimSphere->SetSphereRadius(BallRadius);
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArm->SetupAttachment(GetRootComponent());
@@ -57,15 +56,6 @@ void ABall::BeginPlay()
 	//Setting Distance travelled to 0 when the game starts
 	DistanceTravelled = 0.f;
 
-	//Create and Enable Mapping Context
-	if (const APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(InputMappingContext, 0);
-		}
-	}
-
 	//Start Playing Roll Audio
 	RollAudio->Play();
 	RollAudio->SetVolumeMultiplier(0.f);
@@ -84,7 +74,7 @@ void ABall::Tick(float DeltaTime)
 	GetTravelledDistance(DeltaTime);
 	SetRollAudioIntensity();
 
-	FloorTrace(BallMesh->GetComponentLocation());
+	FloorTrace();
 	
 }
 
@@ -118,45 +108,12 @@ void ABall::Look(const FInputActionValue& Value)
 	}
 }
 
-void ABall::Jump(const FInputActionValue& Value)
-{
-	if(!bIsFalling)
-	{
-		SimSphere->AddForce(FVector(0.f, 0.f,JumpForce));
-	}
-}
-
-void ABall::Pause(const FInputActionValue& Value)
-{
-
-	if(UGameplayStatics::IsGamePaused(GetWorld()))
-	{
-		UGameplayStatics::SetGamePaused(GetWorld(), false);
-	}
-	else
-	{
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-	}
-}
-
-void ABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ABall::Move);
-		EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ABall::Look);
-		EnhancedInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &ABall::Jump);
-		EnhancedInputComponent->BindAction(IA_Pause, ETriggerEvent::Started, this, &ABall::Pause);
-	}
-}
-
 //Custom Functions
 void ABall::SetCamFocus()
 {
 	Camera->FocusSettings.FocusMethod = ECameraFocusMethod::Manual;
 	const float FocusDist = FVector::Dist(Camera->GetComponentLocation(), BallMesh->GetComponentLocation());
+	
 	if(UGameplayStatics::IsGamePaused(GetWorld()))
 	{
 		Camera->SetCurrentAperture(0.1f);
@@ -214,32 +171,34 @@ void ABall::OnRollAudioFinished()
 
 void ABall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if(NormalImpulse.Length()*100.f > HitSoundThreshold)
+	if(NormalImpulse.Length()*50.f > HitSoundThreshold)
 	{
 		HitAudio->Play();
 	}
-	
 }
 
-bool ABall::FloorTrace(FVector InputLocation)
+bool ABall::FloorTrace()
 {
-
-	
-	FCollisionQueryParams TraceParams(FName(TEXT("LineTraceByChannel")), true, this);
-	const FVector TraceStart = InputLocation;
-	FVector TraceEnd = TraceStart + FVector(0.f, 0.f, -25.f);
-	
 	if(GetWorld())
 	{
+		const FVector TraceStart = SimSphere->GetComponentLocation() + FVector(0.f, 0.f, BallRadius);
+		const float TraceDistance = 2.f * BallRadius + 10.f;
+		const FVector TraceEnd = TraceStart - FVector(0.f, 0.f, TraceDistance);
+		TArray<AActor*> IgnoredActors;
+		IgnoredActors.Add(GetOwner());
+		FHitResult TraceHitResult;
+		
+		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), TraceStart, TraceEnd, BallRadius,
+		                                        UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoredActors,
+		                                        EDrawDebugTrace::None, TraceHitResult, true, FLinearColor::Green,
+		                                        FLinearColor::Red, 1.f);
 
-		FHitResult LineHitResult;
-		GetWorld()->LineTraceSingleByChannel(LineHitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
+		const float HitDistance = FVector::Dist(TraceHitResult.ImpactPoint, TraceStart);
 
-		const float HitDistance = FVector::Dist(LineHitResult.ImpactPoint, InputLocation);
-
-		if(HitDistance>25.f)
+		if(HitDistance>TraceDistance)
 		{
 			bIsFalling = true;
+			UKismetSystemLibrary::DrawDebugString(GetWorld(), TraceStart + FVector(0.f, 0.f, 40.f), TEXT("Falling"));
 		}
 		else
 		{

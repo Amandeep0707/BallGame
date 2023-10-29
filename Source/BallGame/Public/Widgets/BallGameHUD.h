@@ -6,7 +6,9 @@
 #include "GameFramework/HUD.h"
 #include "BallGameHUD.generated.h"
 
+class ABall;
 class UGameplayWidget;
+class UMenuWidget;
 
 UCLASS()
 class BALLGAME_API ABallGameHUD : public AHUD
@@ -20,11 +22,24 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+	//CustomFunctions
+	void Paused();
+	void Unpaused();
+
 protected:
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<UUserWidget> GameplayHUD;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Widgets")
 	UGameplayWidget* HUD;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<UUserWidget> MenuHUD;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Widgets")
+	UMenuWidget* Menu;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Ball Stats")
+	ABall* BP_Ball;
 };

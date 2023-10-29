@@ -7,9 +7,7 @@
 #include "GameplayWidget.generated.h"
 
 class ABall;
-/**
- * 
- */
+
 UCLASS()
 class BALLGAME_API UGameplayWidget : public UUserWidget
 {

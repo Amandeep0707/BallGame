@@ -7,9 +7,8 @@
 #include "GameFramework/Pawn.h"
 #include "Ball.generated.h"
 
+class ABallGameHUD;
 class UAudioComponent;
-class UInputMappingContext;
-class UInputAction;
 class USpringArmComponent;
 class UCineCameraComponent;
 class USphereComponent;
@@ -26,7 +25,6 @@ public:
 	ABall();
 
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//Read Only Variables
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball Parameters")
@@ -37,34 +35,15 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsGameOver = false;
-	
 
-protected:
-	
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, Category = Inputs)
-	UInputMappingContext* InputMappingContext;
-
-	UPROPERTY(EditAnywhere, Category = Inputs)
-	UInputAction* IA_Move;
-
-	UPROPERTY(EditAnywhere, Category = Inputs)
-	UInputAction* IA_Look;
-
-	UPROPERTY(EditAnywhere, Category = Inputs)
-	UInputAction* IA_Jump;
-
-	UPROPERTY(EditAnywhere, Category = Inputs)
-	UInputAction* IA_Pause;
-
+	//Custom Functions
 	void Move(const FInputActionValue& Value);
 
 	void Look(const FInputActionValue& Value);
 
-	void Jump(const FInputActionValue& Value);
-
-	void Pause(const FInputActionValue& Value);
+protected:
+	
+	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* BallMesh;
@@ -95,25 +74,24 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Audio Parameters")
 	UCurveFloat* RollSoundCurve;
-
 	
-	UPROPERTY(EditAnywhere, Category = "Ball Audio Parameters")
+	UPROPERTY(EditDefaultsOnly, Category = "Ball Audio Parameters")
 	float HitSoundThreshold = 10.f;
 
-	UPROPERTY(EditAnywhere, Category = "Ball Parameters")
-	float ForceMultiplier = 7500.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters")
+	float BallRadius = 20.f;
 
 	UPROPERTY(EditAnywhere, Category = "Ball Parameters")
-	float JumpForce = 500000.f;
+	float ForceMultiplier = 5000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Camera Parameters")
 	float DefaultZoom = 35.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Camera Parameters")
-	float MaxVelocityZoom = 18.0f;
+	float MaxVelocityZoom = 16.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Camera Parameters")
-	float CameraZoomInterpSpeed = 1.f;
+	float CameraZoomInterpSpeed = 5.f;
 	
 
 	//Private Functions
@@ -129,5 +107,6 @@ private:
 	UFUNCTION()
 	void OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	bool FloorTrace(FVector InputLocation);
+	UFUNCTION()
+	bool FloorTrace();
 };

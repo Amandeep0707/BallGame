@@ -23,22 +23,6 @@ void ABallGameGameModeBase::BeginPlay()
 	{
 		BP_Ball = Ball;
 	}
-
-	if(GEngine)
-	{
-		FString AllData;
-		AllData.Append(TEXT("Ball Physical Material: "));
-		AllData.Append(FString::Printf(TEXT("%d"), static_cast<int32>(BallMaterialType)));
-		AllData.Append(TEXT("\nLives Remaining: "));
-		AllData.Append(FString::Printf(TEXT("%d"), LivesRemaining));
-		AllData.Append(TEXT("\nScore: "));
-		AllData.Append(FString::Printf(TEXT("%f"), Score));
-		AllData.Append(TEXT("\nCheckpoint Counter: "));
-		AllData.Append(FString::Printf(TEXT("%d"), CheckpointCounter));
-
-		GEngine->AddOnScreenDebugMessage(1, 10.f, FColor::Cyan, AllData);
-		GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Magenta, BP_Ball->GetName());
-	}
 }
 
 void ABallGameGameModeBase::GameOver()
