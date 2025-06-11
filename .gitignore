@@ -74,5 +74,5 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # Exclude Blender Backup Files
-Assets/**/*.blend1
-Assets/**/*.blend1
+Assets/blend/*.blend1
+Assets/blend/*.blend2
