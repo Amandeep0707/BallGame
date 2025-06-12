@@ -23,19 +23,12 @@ class BALLGAME_API ABall : public APawn
 public:
 	
 	ABall();
-
 	virtual void Tick(float DeltaTime) override;
-
-	//Read Only Variables
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ball Parameters")
-	float MaxDesiredVelocity = 10.f;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ball Paramaters")
-	float DistanceTravelled;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsGameOver = false;
-
+	// Getter Functions
+	FORCEINLINE float GetMaxDesiredVelocity() const { return MaxDesiredVelocity; }
+	FORCEINLINE float GetDistanceTravelled() const { return DistanceTravelled; }
+	
 	//Custom Functions
 	void Move(const FInputActionValue& Value);
 
@@ -45,52 +38,61 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 	UStaticMeshComponent* BallMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
 	USphereComponent* SimSphere;
 
 	//Read Only Variables
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsFalling;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsGameOver = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	float DistanceTravelled;
 	
 private:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleDefaultsOnly)
 	USpringArmComponent* SpringArm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCineCameraComponent* Camera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "GameData")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | GameData")
 	ABallGameGameModeBase* GameMode;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Audio Parameters")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | Audio")
 	UAudioComponent* RollAudio;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Audio Parameters")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | Audio")
 	UAudioComponent* HitAudio;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Audio Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | Audio")
 	UCurveFloat* RollSoundCurve;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Ball Audio Parameters")
+
+	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Audio")
 	float HitSoundThreshold = 10.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | Default")
+	float MaxDesiredVelocity = 10.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters | Default")
 	float BallRadius = 20.f;
 
-	UPROPERTY(EditAnywhere, Category = "Ball Parameters")
+	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Default")
 	float ForceMultiplier = 5000.f;
 
-	UPROPERTY(EditAnywhere, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Camera")
 	float DefaultZoom = 35.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Camera")
 	float MaxVelocityZoom = 16.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Camera")
 	float CameraZoomInterpSpeed = 5.f;
 	
 

@@ -65,6 +65,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Unit Generation")
 	void GenerateBranchedMap();
 
+	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Unit Generation")
+	void ClearMap();
+
 	UFUNCTION(BlueprintCallable, Category="Unit Generation")
 	void DebugAllOccupiedCells(const TSet<FIntVector> &Cells, const float GridUnitSize) const;
 
@@ -121,7 +124,4 @@ private:
 	 * @return True if the placement is viable, false otherwise.
 	 */
 	bool IsUnitPlacementViable(const TSubclassOf<ABaseUnit>& UnitClass, const FTransform& UnitTransform) const;
-
-	UFUNCTION(BlueprintCallable, Category = "Unit Generation")
-	void ClearMap();
 };

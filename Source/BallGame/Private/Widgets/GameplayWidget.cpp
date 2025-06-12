@@ -30,6 +30,6 @@ void UGameplayWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	DistanceTravelled = BP_Ball->DistanceTravelled;
-	MaxVelocity = BP_Ball->MaxDesiredVelocity;
+	DistanceTravelled = BP_Ball->GetDistanceTravelled();
+	MaxVelocity = BP_Ball->GetMaxDesiredVelocity();
 }

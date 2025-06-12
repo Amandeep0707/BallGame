@@ -144,6 +144,8 @@ void ABall::SetCamZoom()
 
 void ABall::GetTravelledDistance(float Time)
 {
+	if (bIsFalling) return;
+	
 	const float CurrentVelocity = GetVelocity().Length() / 100.f;
 	DistanceTravelled += CurrentVelocity*Time;
 }
