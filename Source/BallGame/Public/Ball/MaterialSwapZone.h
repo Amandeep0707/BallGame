@@ -18,6 +18,8 @@ public:
 	AMaterialSwapZone();
 	virtual void Tick(float DeltaTime) override;
 
+	FORCEINLINE EBallMaterial GetTargetMaterial() const { return TargetMaterial; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -26,6 +28,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UStaticMeshComponent* VisualMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USceneComponent* SnapPoint;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UBoxComponent* TriggerVolume;

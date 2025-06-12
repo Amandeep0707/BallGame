@@ -6,15 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "BallGameGameModeBase.generated.h"
 
+class ABallGameHUD;
 class ABall;
-
-UENUM()
-enum EBallPhysicalMaterial : uint8
-{
-	MetalMaterial,
-	WoodMaterial,
-	PaperMaterial
-};
 
 UCLASS()
 class BALLGAME_API ABallGameGameModeBase : public AGameModeBase
@@ -26,25 +19,29 @@ public:
 	ABallGameGameModeBase();
 	virtual void BeginPlay() override;
 
+	// --- Getter Functions ---
+	FORCEINLINE int32 GetCurrentPlayerLives() const { return StartingPlayerLives; }
+
 	//Read Only Variables
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GameData")
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	ABall* BP_Ball;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GameData")
-	TEnumAsByte<EBallPhysicalMaterial> BallMaterialType;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	int32 LivesRemaining;
 
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	float Score;
-
-	UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	int32 CheckpointCounter;
+	ABallGameHUD* GameHUD;
 
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	FVector LastCheckpointLocation;
 
 	void PlayerFell();
 	void UpdateCheckpoint(const FVector& NewCheckpointTransform);
+
+private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Game Rules")
+	int32 StartingPlayerLives = 3;
+
+	int32 CurrentPlayerLives;
+
+	void GameOver();
+	void LevelComplete();
 };

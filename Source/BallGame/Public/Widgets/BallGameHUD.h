@@ -7,8 +7,11 @@
 #include "BallGameHUD.generated.h"
 
 class ABall;
+class ABallGameGameModeBase;
 class UGameplayWidget;
 class UMenuWidget;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerLivesUpdate, int32, RemainingLives);
 
 UCLASS()
 class BALLGAME_API ABallGameHUD : public AHUD
@@ -26,6 +29,9 @@ public:
 	void Paused();
 	void Unpaused();
 
+	UPROPERTY(BlueprintAssignable, Category="Gameplay")
+	FOnPlayerLivesUpdate PlayerLivesUpdate;
+
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widgets")
@@ -42,4 +48,7 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Ball Stats")
 	ABall* BP_Ball;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "GameData")
+	ABallGameGameModeBase* GameMode;
 };

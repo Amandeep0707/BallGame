@@ -17,6 +17,9 @@ AMaterialSwapZone::AMaterialSwapZone()
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
 	VisualMesh->SetupAttachment(Root);
 
+	SnapPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SnapPoint"));
+	SnapPoint->SetupAttachment(Root);
+
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerVolume"));
 	TriggerVolume->SetupAttachment(Root);
 	TriggerVolume->SetCollisionProfileName(TEXT("Trigger"));
@@ -35,11 +38,14 @@ void AMaterialSwapZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 {
 	if (ABall* Ball = Cast<ABall>(OtherActor))
 	{
-		Ball->ChangeMaterial(TargetMaterial);
-		
-		DrawDebugString(GetWorld(), GetActorLocation(),
-		                FString::Printf(TEXT("Changed Material to %s"), *UEnum::GetValueAsString(TargetMaterial)), nullptr,
-		                FColor::Emerald, 10.f);
+		// Don't re-trigger if the ball is already being controlled
+		if (Ball->IsAutoPiloting()) return;
+
+		// NEW: Tell the ball to move to our snap point. The ball's logic will handle changing the material on completion.
+		Ball->StartAutoPilot(SnapPoint->GetComponentLocation(), this);
+
+		// Deactivate this trigger to prevent it from firing again immediately
+		TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

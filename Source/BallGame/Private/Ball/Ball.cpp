@@ -4,6 +4,7 @@
 #include "Ball/Ball.h"
 
 #include "CineCameraComponent.h"
+#include "Ball/MaterialSwapZone.h"
 #include "BallGame/BallGameGameModeBase.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
@@ -70,6 +71,8 @@ void ABall::BeginPlay()
 void ABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsAutoPiloting) UpdateAutoPilot(DeltaTime);
 	
 	SetCamFocus();
 	SetCamZoom();
@@ -80,9 +83,81 @@ void ABall::Tick(float DeltaTime)
 	
 }
 
-//Input Functions
+void ABall::StartAutoPilot(const FVector& TargetLocation, AActor* Requester)
+{
+	if (bIsAutoPiloting) return; // Already in progress
+
+	bIsAutoPiloting = true;
+	bPlayerInputEnabled = false;
+	AutoPilotTargetLocation = TargetLocation;
+	AutoPilotRequester = Requester;
+
+	// SimSphere->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	// SimSphere->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+}
+
+void ABall::StopAutoPilot()
+{
+	// Perform actions based on who requested the autopilot
+	if (AutoPilotRequester.IsValid())
+	{
+		if (AMaterialSwapZone* Zone = Cast<AMaterialSwapZone>(AutoPilotRequester.Get()))
+		{
+			// If the requester was a material swapper, change the material now
+			ChangeMaterial(Zone->GetTargetMaterial());
+		}
+		// Could add else-if blocks for other requester types here in the future
+	}
+    
+	// Clear the requester and re-enable physics and player control
+	AutoPilotRequester = nullptr;
+	SimSphere->SetSimulatePhysics(true);
+	bPlayerInputEnabled = true;
+
+	// Clear the timer just in case
+	GetWorld()->GetTimerManager().ClearTimer(SettleTimerHandle);
+}
+
+void ABall::UpdateAutoPilot(float DeltaTime)
+{
+	const FVector CurrentLocation = GetActorLocation() * FVector(1.f, 1.f, 0.f);
+	const float DistanceToTarget = FVector::Dist(CurrentLocation, AutoPilotTargetLocation * FVector(1.f, 1.f, 0.f));
+
+	// Check if we have arrived at the destination
+	if (DistanceToTarget < 2.0f) // Use a small tolerance
+	{
+		bIsAutoPiloting = false; // Stop the autopilot movement logic
+
+		// Kill all physics to make the ball "stick" in place for the pause
+		SimSphere->SetSimulatePhysics(false);
+		SetActorLocation(AutoPilotTargetLocation); // Snap to the final position
+
+		// Start a 3-second timer to wait for VFX, etc.
+		// After the timer, StopAutoPilot will be called.
+		GetWorld()->GetTimerManager().SetTimer(SettleTimerHandle, this, &ABall::StopAutoPilot, 3.0f, false);
+	}
+	else
+	{
+		// --- This is a simple PD (Proportional-Derivative) controller ---
+
+		const UBallMaterialDataAsset* MaterialData = MaterialDataAssets[CurrentMaterial];
+		const FBallMaterialProperties& Props = MaterialData->Properties;
+        
+		// Proportional Force: Pulls the ball towards the target. Stronger when further away.
+		const FVector ForceDirection = (AutoPilotTargetLocation - CurrentLocation).GetSafeNormal();
+		const FVector ProportionalForce = ForceDirection * Props.ForceMultiplier;
+
+		// Derivative Force: Acts as a brake. Pushes against the current velocity to prevent overshooting.
+		const FVector DampingForce = -SimSphere->GetPhysicsLinearVelocity() * AutoPilotDampingMultiplier * Props.LinearDamping;
+
+		// Apply the combined force
+		SimSphere->AddForce(ProportionalForce + DampingForce);
+	}
+}
+
 void ABall::Move(const FInputActionValue& Value)
 {
+	if (!bPlayerInputEnabled) return;
 	const FVector2D MovementVector = Value.	Get<FVector2D>();
 
 	//Get Transformed Movement for Force.
@@ -106,7 +181,7 @@ void ABall::Look(const FInputActionValue& Value)
 	if (Controller)
 	{
 		AddControllerYawInput(LookVector.X);
-		//AddControllerPitchInput(LookVector.Y);
+		// AddControllerPitchInput(LookVector.Y);
 	}
 }
 
@@ -123,7 +198,6 @@ void ABall::ChangeMaterial(EBallMaterial NewMaterial)
 	}
 }
 
-//Custom Functions
 void ABall::SetCamFocus()
 {
 	Camera->FocusSettings.FocusMethod = ECameraFocusMethod::Manual;

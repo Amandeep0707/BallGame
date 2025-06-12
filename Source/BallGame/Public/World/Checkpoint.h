@@ -27,6 +27,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UStaticMeshComponent* VisualMesh;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	USceneComponent* SnapPoint;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	UBoxComponent* TriggerVolume;
 

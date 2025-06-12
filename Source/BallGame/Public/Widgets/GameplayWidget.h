@@ -7,15 +7,19 @@
 #include "GameplayWidget.generated.h"
 
 class ABall;
+class ABallGameHUD;
 
 UCLASS()
 class BALLGAME_API UGameplayWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-	virtual bool Initialize() override;	
+	virtual bool Initialize() override;
 
 public:
+
+	// --- Setter Function ---
+	FORCEINLINE void SetHUDRef(ABallGameHUD* Ref) {GameHUD = Ref; };
 
 	//Inherited Parent Functions
 	virtual void NativeConstruct() override;
@@ -33,4 +37,7 @@ protected:
 	//Custom Variables
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ball Stats")
 	ABall* BP_Ball;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ball Stats")
+	ABallGameHUD* GameHUD;
 };

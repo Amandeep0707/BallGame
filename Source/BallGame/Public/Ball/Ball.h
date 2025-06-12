@@ -33,6 +33,10 @@ public:
 	FORCEINLINE float GetMaxDesiredVelocity() const { return MaxDesiredVelocity; }
 	FORCEINLINE float GetDistanceTravelled() const { return DistanceTravelled; }
 	FORCEINLINE USphereComponent* GetSimSphere() const { return SimSphere; }
+	FORCEINLINE void SetIsGameOver(bool Value) { bIsGameOver = Value; }
+	
+	/** Returns true if the ball is currently in an automated movement sequence. */
+	FORCEINLINE bool IsAutoPiloting() const { return bIsAutoPiloting; }
 	
 	//Custom Functions
 	void Move(const FInputActionValue& Value);
@@ -41,6 +45,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ball Parameters | Material")
 	void ChangeMaterial(EBallMaterial NewMaterial);
+
+	/**
+	* @brief Initiates an automated movement sequence to a target location.
+	* Disables player input, moves the ball, pauses, and then calls a completion action.
+	* @param TargetLocation The world-space location to move the ball to.
+	* @param Requester The actor that initiated this request (e.g., the checkpoint or material swapper).
+	*/
+	void StartAutoPilot(const FVector& TargetLocation, AActor* Requester = nullptr);
 
 protected:
 	
@@ -58,6 +70,15 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	float DistanceTravelled;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ForceMultiplier = 1.f;
+
+	/** Called from Tick() to handle the physics-based movement towards the autopilot target. */
+	void UpdateAutoPilot(float DeltaTime);
+
+	/** Called by a timer after the ball has settled at the target location. Releases control back to the player. */
+	void StopAutoPilot();
 	
 private:
 
@@ -91,9 +112,6 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "Ball Parameters | Default")
 	EBallMaterial DefaultMaterial;
 
-	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Default")
-	float ForceMultiplier = 5000.f;
-
 	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Camera")
 	float DefaultZoom = 35.0f;
 
@@ -103,9 +121,36 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Camera")
 	float CameraZoomInterpSpeed = 5.f;
 
-	// The map of all available material data assets
+	/** The map of all available material data assets */
 	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters | Material")
 	TMap<EBallMaterial, UBallMaterialDataAsset*> MaterialDataAssets;
+
+	/** True if the ball is currently in an automated movement sequence. */
+	UPROPERTY(VisibleInstanceOnly, Category = "Ball Parameters | State")
+	bool bIsAutoPiloting = false;
+
+	/** If true, the player can provide move/look input. Set to false during autopilot. */
+	UPROPERTY(VisibleInstanceOnly, Category = "Ball Parameters | State")
+	bool bPlayerInputEnabled = true;
+
+	/** The world-space location the ball is trying to reach during autopilot. */
+	FVector AutoPilotTargetLocation;
+
+	/** A handle for the timer that waits for VFX/settling before releasing control. */
+	FTimerHandle SettleTimerHandle;
+
+	/** A weak pointer to the actor that requested the autopilot, so we can perform context-specific actions on completion. */
+	TWeakObjectPtr<AActor> AutoPilotRequester;
+
+	// --- AUTOPILOT PHYSICS ---
+    
+	/** The strength of the force pulling the ball towards the target. */
+	UPROPERTY(EditAnywhere, Category="Ball Parameters | Autopilot")
+	float AutoPilotStrengthMultiplier = 10.0f;
+
+	/** The strength of the damping force to prevent overshooting. */
+	UPROPERTY(EditAnywhere, Category="Ball Parameters | Autopilot")
+	float AutoPilotDampingMultiplier = 3.0f;
 
 	UPROPERTY()
 	EBallMaterial CurrentMaterial;

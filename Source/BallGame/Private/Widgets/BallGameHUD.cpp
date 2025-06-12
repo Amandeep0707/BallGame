@@ -2,13 +2,12 @@
 
 
 #include "Widgets/BallGameHUD.h"
-
 #include "Ball/Ball.h"
+#include "BallGame/BallGameGameModeBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/GameplayWidget.h"
 #include "Widgets/MenuWidget.h"
-#include "Ball/Ball.h"
 
 
 ABallGameHUD::ABallGameHUD()
@@ -24,6 +23,7 @@ void ABallGameHUD::BeginPlay()
 	if(GameplayHUD)
 	{
 		HUD = CreateWidget<UGameplayWidget>(GetWorld(), GameplayHUD);
+		HUD->SetHUDRef(this);
 		HUD->AddToViewport();
 	}
 
@@ -34,8 +34,11 @@ void ABallGameHUD::BeginPlay()
 		Menu->AddToViewport();
 	}
 
-	//Cast to BP_Ball
+	// Save Ball Ref
 	BP_Ball = Cast<ABall>(GetOwningPawn());
+
+	// Save GameMode Ref
+	GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 void ABallGameHUD::Tick(float DeltaTime)

@@ -16,6 +16,9 @@ ACheckpoint::ACheckpoint()
 
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
 	VisualMesh->SetupAttachment(Root);
+	
+	SnapPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SnapPoint"));
+	SnapPoint->SetupAttachment(Root);
 
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerVolume"));
 	TriggerVolume->SetupAttachment(Root);
@@ -33,10 +36,19 @@ void ACheckpoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 {
 	if (ABall* Ball = Cast<ABall>(OtherActor))
 	{
+		// Don't re-trigger if the ball is already being controlled
+		if (Ball->IsAutoPiloting()) return;
+
 		if (ABallGameGameModeBase* GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
 		{
-			// Tell the GameMode to update the last checkpoint
-			GameMode->UpdateCheckpoint(GetActorLocation() + FVector(0.f, 0.f, 20.f));
+			// Tell the GameMode to update the last checkpoint transform
+			GameMode->UpdateCheckpoint(SnapPoint->GetComponentLocation());
+
+			// Tell the ball to move to our snap point
+			Ball->StartAutoPilot(SnapPoint->GetComponentLocation(), this);
+
+			// Deactivate this trigger to prevent it from firing again immediately
+			TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 			DrawDebugString(GetWorld(), GetActorLocation(), TEXT("Checkpoint Saved!!!"), nullptr,
 						FColor::Yellow, 10.f);

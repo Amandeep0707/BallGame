@@ -5,49 +5,74 @@
 #include "Ball/Ball.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Widgets/BallGameHUD.h"
 
 ABallGameGameModeBase::ABallGameGameModeBase()
 {
-	//Initialize Variables
-	BallMaterialType = EBallPhysicalMaterial::MetalMaterial;
-	LivesRemaining = 3;
-	Score = 100.f;
-	CheckpointCounter = 0;
-	
+	// Initialize Variables
 }
 
 void ABallGameGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CurrentPlayerLives = StartingPlayerLives;
+	
 	if (const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
 	{
 		LastCheckpointLocation = PlayerPawn->GetActorLocation();
 	}
 
-	if(ABall* Ball = Cast<ABall>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+	BP_Ball = Cast<ABall>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+	GameHUD = Cast<ABallGameHUD>(HUDClass);
+	if (GameHUD)
 	{
-		BP_Ball = Ball;
+		GameHUD->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
 	}
 }
 
 void ABallGameGameModeBase::PlayerFell()
 {
-	if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
+	CurrentPlayerLives--;
+
+	if (GameHUD)
 	{
-		// Disable physics, then teleport, then re-enable
-		ABall* Ball = Cast<ABall>(PlayerPawn);
-		if(Ball)
+		GameHUD->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
+	}
+
+	if (CurrentPlayerLives > 0)
+	{
+		// Respawn logic (you already have this)
+		if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
 		{
-			Ball->GetSimSphere()->SetSimulatePhysics(false);
-			Ball->SetActorLocation(LastCheckpointLocation);
-			Ball->GetSimSphere()->SetSimulatePhysics(true);
-			Ball->bIsGameOver = false;
+			if(ABall* Ball = Cast<ABall>(PlayerPawn))
+			{
+				Ball->GetSimSphere()->SetSimulatePhysics(false);
+				Ball->SetActorLocation(LastCheckpointLocation);
+				Ball->GetSimSphere()->SetSimulatePhysics(true);
+				Ball->SetIsGameOver(false);
+			}
 		}
+	}
+	else
+	{
+		GameOver();
 	}
 }
 
 void ABallGameGameModeBase::UpdateCheckpoint(const FVector& NewCheckpointTransform)
 {
 	LastCheckpointLocation = NewCheckpointTransform;
+}
+
+void ABallGameGameModeBase::GameOver()
+{
+	UE_LOG(LogTemp, Warning, TEXT("GAME OVER"));
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+}
+
+void ABallGameGameModeBase::LevelComplete()
+{
+	UE_LOG(LogTemp, Log, TEXT("LEVEL COMPLETE!"));
 }
