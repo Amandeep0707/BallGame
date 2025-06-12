@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
+#include "Ball/BallTypes.h"
 #include "Ball.generated.h"
 
 class ABallGameHUD;
@@ -62,7 +63,7 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCineCameraComponent* Camera;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | GameData")
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | GameData")
 	ABallGameGameModeBase* GameMode;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Ball Parameters | Audio")
@@ -94,6 +95,19 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Camera")
 	float CameraZoomInterpSpeed = 5.f;
+
+	// The map of all available material data assets
+	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters | Material")
+	TMap<EBallMaterial, UBallMaterialDataAsset*> MaterialDataAssets;
+
+	UPROPERTY(EditInstanceOnly, Category = "Ball Parameters | Material")
+	EBallMaterial DefaultMaterial;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Ball Parameters | Material")
+	EBallMaterial CurrentMaterial;
+	
+	UFUNCTION(BlueprintCallable, Category = "Ball Parameters | Material")
+	void ChangeMaterial(EBallMaterial NewMaterial);
 	
 
 	//Private Functions
@@ -101,6 +115,7 @@ private:
 	void SetCamZoom();
 	void GetTravelledDistance(float Time);
 	void SetRollAudioIntensity();
+	void ApplyMaterialProperties();
 
 	//Delegates
 	UFUNCTION()

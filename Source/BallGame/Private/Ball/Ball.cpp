@@ -63,6 +63,8 @@ void ABall::BeginPlay()
 	//Initializing Variables
 	bIsGameOver = false;
 	GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	ChangeMaterial(DefaultMaterial);
 }
 
 void ABall::Tick(float DeltaTime)
@@ -105,6 +107,19 @@ void ABall::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookVector.X);
 		//AddControllerPitchInput(LookVector.Y);
+	}
+}
+
+void ABall::ChangeMaterial(EBallMaterial NewMaterial)
+{
+	if (MaterialDataAssets.Contains(NewMaterial))
+	{
+		CurrentMaterial = NewMaterial;
+		ApplyMaterialProperties();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attempted to change to an invalid material type."))
 	}
 }
 
@@ -164,6 +179,26 @@ void ABall::SetRollAudioIntensity()
 		RollAudio->Stop();
 	}
 	
+}
+
+void ABall::ApplyMaterialProperties()
+{
+	const UBallMaterialDataAsset* MaterialData = MaterialDataAssets[CurrentMaterial];
+	if (!MaterialData) return;
+
+	const FBallMaterialProperties& Props = MaterialData->Properties;
+
+	// Update Mesh
+	BallMesh->SetStaticMesh(Props.BallMesh);
+	
+	// Update Physics Properties
+	SimSphere->SetMassScale(NAME_None, Props.MassScale);
+	SimSphere->SetLinearDamping(Props.LinearDamping);
+	SimSphere->SetAngularDamping(Props.AngularDamping);
+	SimSphere->SetPhysMaterialOverride(Props.PhysicsMaterial);
+	
+	// We can also update our gameplay variables
+	ForceMultiplier = Props.ForceMultiplier;
 }
 
 void ABall::OnRollAudioFinished()
