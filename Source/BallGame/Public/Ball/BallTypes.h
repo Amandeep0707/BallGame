@@ -24,6 +24,9 @@ struct FBallMaterialProperties
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")
 	UStaticMesh* BallMesh = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")
+	UMaterialInterface* VisualMaterial = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")
 	UPhysicalMaterial* PhysicsMaterial = nullptr;

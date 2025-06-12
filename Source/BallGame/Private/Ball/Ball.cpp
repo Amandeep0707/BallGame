@@ -190,6 +190,7 @@ void ABall::ApplyMaterialProperties()
 
 	// Update Mesh
 	BallMesh->SetStaticMesh(Props.BallMesh);
+	BallMesh->SetMaterial(0, Props.VisualMaterial);
 	
 	// Update Physics Properties
 	SimSphere->SetMassScale(NAME_None, Props.MassScale);
@@ -235,7 +236,6 @@ bool ABall::FloorTrace()
 		if(HitDistance>TraceDistance)
 		{
 			bIsFalling = true;
-			UKismetSystemLibrary::DrawDebugString(GetWorld(), TraceStart + FVector(0.f, 0.f, 40.f), TEXT("Falling"));
 		}
 		else
 		{
@@ -253,7 +253,7 @@ bool ABall::FloorTrace()
 			bIsGameOver = true;
 			if(GameMode)
 			{
-				GameMode->GameOver();
+				GameMode->PlayerFell();
 			}
 		}
 	}

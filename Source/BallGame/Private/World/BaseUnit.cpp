@@ -6,7 +6,7 @@
 
 ABaseUnit::ABaseUnit()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 void ABaseUnit::BeginPlay()

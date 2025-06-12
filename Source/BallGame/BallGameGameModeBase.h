@@ -33,15 +33,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GameData")
 	TEnumAsByte<EBallPhysicalMaterial> BallMaterialType;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GameData")
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	int32 LivesRemaining;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GameData")
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	float Score;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GameData")
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	int32 CheckpointCounter;
 
-	UFUNCTION()
-	void GameOver();
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
+	FTransform LastCheckpointTransform;
+
+	void PlayerFell();
+	void UpdateCheckpoint(const FTransform& NewCheckpointTransform);
 };

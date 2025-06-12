@@ -7,7 +7,7 @@
 
 ALevelGenerator::ALevelGenerator()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 void ALevelGenerator::BeginPlay()

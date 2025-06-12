@@ -22,6 +22,9 @@ class BALLGAME_API ABall : public APawn
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsGameOver = false;
 	
 	ABall();
 	virtual void Tick(float DeltaTime) override;
@@ -29,11 +32,15 @@ public:
 	// Getter Functions
 	FORCEINLINE float GetMaxDesiredVelocity() const { return MaxDesiredVelocity; }
 	FORCEINLINE float GetDistanceTravelled() const { return DistanceTravelled; }
+	FORCEINLINE USphereComponent* GetSimSphere() const { return SimSphere; }
 	
 	//Custom Functions
 	void Move(const FInputActionValue& Value);
 
 	void Look(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Ball Parameters | Material")
+	void ChangeMaterial(EBallMaterial NewMaterial);
 
 protected:
 	
@@ -48,9 +55,6 @@ protected:
 	//Read Only Variables
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsFalling;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsGameOver = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	float DistanceTravelled;
@@ -84,6 +88,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters | Default")
 	float BallRadius = 20.f;
 
+	UPROPERTY(EditInstanceOnly, Category = "Ball Parameters | Default")
+	EBallMaterial DefaultMaterial;
+
 	UPROPERTY(EditAnywhere, Category = "Ball Parameters | Default")
 	float ForceMultiplier = 5000.f;
 
@@ -100,14 +107,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Ball Parameters | Material")
 	TMap<EBallMaterial, UBallMaterialDataAsset*> MaterialDataAssets;
 
-	UPROPERTY(EditInstanceOnly, Category = "Ball Parameters | Material")
-	EBallMaterial DefaultMaterial;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Ball Parameters | Material")
+	UPROPERTY()
 	EBallMaterial CurrentMaterial;
-	
-	UFUNCTION(BlueprintCallable, Category = "Ball Parameters | Material")
-	void ChangeMaterial(EBallMaterial NewMaterial);
 	
 
 	//Private Functions
