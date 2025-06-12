@@ -43,8 +43,8 @@ public:
 	int32 CheckpointCounter;
 
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	FTransform LastCheckpointTransform;
+	FVector LastCheckpointLocation;
 
 	void PlayerFell();
-	void UpdateCheckpoint(const FTransform& NewCheckpointTransform);
+	void UpdateCheckpoint(const FVector& NewCheckpointTransform);
 };

@@ -22,7 +22,7 @@ void ABallGameGameModeBase::BeginPlay()
 
 	if (const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
 	{
-		LastCheckpointTransform = PlayerPawn->GetActorTransform();
+		LastCheckpointLocation = PlayerPawn->GetActorLocation();
 	}
 
 	if(ABall* Ball = Cast<ABall>(GetWorld()->GetFirstPlayerController()->GetPawn()))
@@ -40,14 +40,14 @@ void ABallGameGameModeBase::PlayerFell()
 		if(Ball)
 		{
 			Ball->GetSimSphere()->SetSimulatePhysics(false);
-			Ball->SetActorTransform(LastCheckpointTransform);
+			Ball->SetActorLocation(LastCheckpointLocation);
 			Ball->GetSimSphere()->SetSimulatePhysics(true);
 			Ball->bIsGameOver = false;
 		}
 	}
 }
 
-void ABallGameGameModeBase::UpdateCheckpoint(const FTransform& NewCheckpointTransform)
+void ABallGameGameModeBase::UpdateCheckpoint(const FVector& NewCheckpointTransform)
 {
-	LastCheckpointTransform = NewCheckpointTransform;
+	LastCheckpointLocation = NewCheckpointTransform;
 }

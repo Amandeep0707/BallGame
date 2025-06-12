@@ -16,7 +16,6 @@ ACheckpoint::ACheckpoint()
 
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
 	VisualMesh->SetupAttachment(Root);
-	VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerVolume"));
 	TriggerVolume->SetupAttachment(Root);
@@ -37,11 +36,7 @@ void ACheckpoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		if (ABallGameGameModeBase* GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
 		{
 			// Tell the GameMode to update the last checkpoint
-			GameMode->UpdateCheckpoint(GetActorTransform());
-            
-			// Optional: Deactivate this checkpoint after use
-			TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			// You could also play a sound or visual effect here
+			GameMode->UpdateCheckpoint(GetActorLocation() + FVector(0.f, 0.f, 20.f));
 
 			DrawDebugString(GetWorld(), GetActorLocation(), TEXT("Checkpoint Saved!!!"), nullptr,
 						FColor::Yellow, 10.f);

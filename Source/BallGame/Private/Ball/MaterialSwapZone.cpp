@@ -16,7 +16,6 @@ AMaterialSwapZone::AMaterialSwapZone()
 
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
 	VisualMesh->SetupAttachment(Root);
-	VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	TriggerVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerVolume"));
 	TriggerVolume->SetupAttachment(Root);

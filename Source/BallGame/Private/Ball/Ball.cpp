@@ -217,30 +217,27 @@ void ABall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 
 bool ABall::FloorTrace()
 {
-	if(GetWorld())
-	{
-		const FVector TraceStart = SimSphere->GetComponentLocation() + FVector(0.f, 0.f, BallRadius);
-		const float TraceDistance = 2.f * BallRadius + 10.f;
-		const FVector TraceEnd = TraceStart - FVector(0.f, 0.f, TraceDistance);
-		TArray<AActor*> IgnoredActors;
-		IgnoredActors.Add(GetOwner());
-		FHitResult TraceHitResult;
+	const FVector TraceStart = SimSphere->GetComponentLocation() + FVector(0.f, 0.f, BallRadius);
+	const float TraceDistance = 2.f * BallRadius + 10.f;
+	const FVector TraceEnd = TraceStart - FVector(0.f, 0.f, TraceDistance);
+	TArray<AActor*> IgnoredActors;
+	IgnoredActors.Add(GetOwner());
+	FHitResult TraceHitResult;
 		
-		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), TraceStart, TraceEnd, BallRadius,
-		                                        UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoredActors,
-		                                        EDrawDebugTrace::None, TraceHitResult, true, FLinearColor::Green,
-		                                        FLinearColor::Red, 1.f);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), TraceStart, TraceEnd, BallRadius,
+											UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoredActors,
+											EDrawDebugTrace::None, TraceHitResult, true, FLinearColor::Green,
+											FLinearColor::Red, 1.f);
 
-		const float HitDistance = FVector::Dist(TraceHitResult.ImpactPoint, TraceStart);
+	const float HitDistance = FVector::Dist(TraceHitResult.ImpactPoint, TraceStart);
 
-		if(HitDistance>TraceDistance)
-		{
-			bIsFalling = true;
-		}
-		else
-		{
-			bIsFalling = false;
-		}
+	if(HitDistance>TraceDistance)
+	{
+		bIsFalling = true;
+	}
+	else
+	{
+		bIsFalling = false;
 	}
 
 	static float FallTimer = 0.f;
