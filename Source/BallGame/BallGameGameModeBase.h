@@ -8,6 +8,7 @@
 
 class ABallGameHUD;
 class ABall;
+class ABallPlayerController;
 
 UCLASS()
 class BALLGAME_API ABallGameGameModeBase : public AGameModeBase
@@ -22,12 +23,15 @@ public:
 	// --- Getter Functions ---
 	FORCEINLINE int32 GetCurrentPlayerLives() const { return StartingPlayerLives; }
 
-	//Read Only Variables
+	
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	ABall* BP_Ball;
+	TObjectPtr<ABall> CachedBallRef;
 
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	ABallGameHUD* GameHUD;
+	TObjectPtr<ABallGameHUD> CachedHUDRef;
+
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
+	TObjectPtr<ABallPlayerController> CachedPlayerControllerRef;
 
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	FVector LastCheckpointLocation;
@@ -41,6 +45,15 @@ private:
 	int32 StartingPlayerLives = 3;
 
 	int32 CurrentPlayerLives;
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABall* GetBallPawn();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABallGameHUD* GetBallGameHUD();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABallPlayerController* GetBallPlayerController();
 
 	void GameOver();
 	void LevelComplete();

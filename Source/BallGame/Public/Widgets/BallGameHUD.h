@@ -33,7 +33,8 @@ public:
 	FOnPlayerLivesUpdate PlayerLivesUpdate;
 
 protected:
-	
+
+	// --- UI Refs ---
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<UUserWidget> GameplayHUD;
 
@@ -46,9 +47,18 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Widgets")
 	UMenuWidget* Menu;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "Ball Stats")
-	ABall* BP_Ball;
+	// ---  Cached Refs ---
+	UPROPERTY(BlueprintReadOnly, Category = "Gameplay")
+	TObjectPtr<ABall> CachedBallRef;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "GameData")
-	ABallGameGameModeBase* GameMode;
+	UPROPERTY(BlueprintReadOnly, Category = "Gameplay")
+	TObjectPtr<ABallGameGameModeBase> CachedGameModeRef;
+
+private:
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABall* GetBallPawn();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABallGameGameModeBase* GetGameMode();
 };

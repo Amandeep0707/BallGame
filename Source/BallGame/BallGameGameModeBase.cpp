@@ -3,6 +3,7 @@
 
 #include "BallGameGameModeBase.h"
 #include "Ball/Ball.h"
+#include "Ball/BallPlayerController.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/BallGameHUD.h"
@@ -22,37 +23,23 @@ void ABallGameGameModeBase::BeginPlay()
 	{
 		LastCheckpointLocation = PlayerPawn->GetActorLocation();
 	}
-
-	BP_Ball = Cast<ABall>(GetWorld()->GetFirstPlayerController()->GetPawn());
-
-	GameHUD = Cast<ABallGameHUD>(HUDClass);
-	if (GameHUD)
-	{
-		GameHUD->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
-	}
 }
 
 void ABallGameGameModeBase::PlayerFell()
 {
 	CurrentPlayerLives--;
 
-	if (GameHUD)
-	{
-		GameHUD->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
-	}
+	// Update Player Remaining Lives in HUD
+	if (GetBallGameHUD()) CachedHUDRef->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);CachedHUDRef->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
 
 	if (CurrentPlayerLives > 0)
 	{
-		// Respawn logic (you already have this)
-		if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
+		if (GetBallPawn())
 		{
-			if(ABall* Ball = Cast<ABall>(PlayerPawn))
-			{
-				Ball->GetSimSphere()->SetSimulatePhysics(false);
-				Ball->SetActorLocation(LastCheckpointLocation);
-				Ball->GetSimSphere()->SetSimulatePhysics(true);
-				Ball->SetIsGameOver(false);
-			}
+			CachedBallRef->GetSimSphere()->SetSimulatePhysics(false);
+			CachedBallRef->SetActorLocation(LastCheckpointLocation);
+			CachedBallRef->GetSimSphere()->SetSimulatePhysics(true);
+			CachedBallRef->SetIsGameOver(false);
 		}
 	}
 	else
@@ -64,6 +51,61 @@ void ABallGameGameModeBase::PlayerFell()
 void ABallGameGameModeBase::UpdateCheckpoint(const FVector& NewCheckpointTransform)
 {
 	LastCheckpointLocation = NewCheckpointTransform;
+}
+
+ABall* ABallGameGameModeBase::GetBallPawn()
+{
+	// 1. Check if we already have a valid, cached reference.
+	if (CachedBallRef && !CachedBallRef.Get()->IsPendingKillPending())
+	{
+		return CachedBallRef;
+	}
+
+	// 2. If not, try to find it. The Pawn is owned by the PlayerController.
+	if (const ABallPlayerController* PC = GetBallPlayerController())
+	{
+		CachedBallRef = Cast<ABall>(PC->GetPawn());
+		return CachedBallRef;
+	}
+
+	// 3. If all else fails, return null.
+	return nullptr;
+}
+
+ABallGameHUD* ABallGameGameModeBase::GetBallGameHUD()
+{
+	// 1. Check cache first.
+	if (CachedHUDRef && !CachedHUDRef.Get()->IsPendingKillPending())
+	{
+		return CachedHUDRef;
+	}
+
+	// 2. If not, find it via the PlayerController.
+	if (ABallPlayerController* PC = GetBallPlayerController())
+	{
+		CachedHUDRef = Cast<ABallGameHUD>(PC->GetHUD());
+		return CachedHUDRef;
+	}
+    
+	// 3. Return null if not found.
+	return nullptr;
+}
+
+ABallPlayerController* ABallGameGameModeBase::GetBallPlayerController()
+{
+	if (CachedPlayerControllerRef)
+	{
+		return CachedPlayerControllerRef;
+	}
+    
+	// PlayerController is the first thing that exists, so it's safe to get.
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+	{
+		CachedPlayerControllerRef = Cast<ABallPlayerController>(PC);
+		return CachedPlayerControllerRef;
+	}
+    
+	return nullptr;
 }
 
 void ABallGameGameModeBase::GameOver()

@@ -3,6 +3,7 @@
 
 #include "Widgets/BallGameHUD.h"
 #include "Ball/Ball.h"
+#include "Ball/BallPlayerController.h"
 #include "BallGame/BallGameGameModeBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -34,11 +35,7 @@ void ABallGameHUD::BeginPlay()
 		Menu->AddToViewport();
 	}
 
-	// Save Ball Ref
-	BP_Ball = Cast<ABall>(GetOwningPawn());
-
-	// Save GameMode Ref
-	GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if(GetGameMode()) PlayerLivesUpdate.Broadcast(CachedGameModeRef->GetCurrentPlayerLives());
 }
 
 void ABallGameHUD::Tick(float DeltaTime)
@@ -78,4 +75,42 @@ void ABallGameHUD::Unpaused()
 		Menu->SetVisibility(ESlateVisibility::Hidden);
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
 	}
+}
+
+ABall* ABallGameHUD::GetBallPawn()
+{
+	// 1. Check if we already have a valid, cached reference.
+	if (CachedBallRef && !CachedBallRef.Get()->IsPendingKillPending())
+	{
+		return CachedBallRef;
+	}
+
+	// 2. If not, try to find it. The Pawn is owned by the PlayerController.
+	if (const ABallPlayerController* PC = Cast<ABallPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	{
+		CachedBallRef = Cast<ABall>(PC->GetPawn());
+		return CachedBallRef;
+	}
+
+	// 3. If all else fails, return null.
+	return nullptr;
+}
+
+ABallGameGameModeBase* ABallGameHUD::GetGameMode()
+{
+	// 1. Check cache first.
+	if (CachedGameModeRef && !CachedGameModeRef.Get()->IsPendingKillPending())
+	{
+		return CachedGameModeRef;
+	}
+
+	// 2. If not, find it via UGameplayStatistics
+	if (AGameModeBase* GameMode = UGameplayStatics::GetGameMode(GetWorld()))
+	{
+		CachedGameModeRef = Cast<ABallGameGameModeBase>(GameMode);
+		return CachedGameModeRef;
+	}
+    
+	// 3. Return null if not found.
+	return nullptr;
 }

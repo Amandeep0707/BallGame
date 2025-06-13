@@ -51,7 +51,7 @@ void ACheckpoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 			TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 			DrawDebugString(GetWorld(), GetActorLocation(), TEXT("Checkpoint Saved!!!"), nullptr,
-						FColor::Yellow, 10.f);
+						FColor::Yellow, 2.f);
 		}
 	}
 }
