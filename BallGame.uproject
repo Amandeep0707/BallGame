@@ -29,6 +29,14 @@
 		{
 			"Name": "CommonUI",
 			"Enabled": true
+		},
+		{
+			"Name": "WindowsDualsense_ds5w",
+			"Enabled": false
+		},
+		{
+			"Name": "PSOnScreenControllerOverlay",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [

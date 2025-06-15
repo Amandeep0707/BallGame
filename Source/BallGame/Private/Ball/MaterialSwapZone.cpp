@@ -41,7 +41,7 @@ void AMaterialSwapZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 		// Don't re-trigger if the ball is already being controlled
 		if (Ball->IsAutoPiloting()) return;
 
-		// NEW: Tell the ball to move to our snap point. The ball's logic will handle changing the material on completion.
+		// The ball's logic will handle changing the material on completion.
 		Ball->StartAutoPilot(SnapPoint->GetComponentLocation(), this);
 
 		// Deactivate this trigger to prevent it from firing again immediately

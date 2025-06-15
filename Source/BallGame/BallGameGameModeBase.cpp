@@ -8,9 +8,15 @@
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/BallGameHUD.h"
 
-ABallGameGameModeBase::ABallGameGameModeBase()
+ABallGameGameModeBase::ABallGameGameModeBase(): DeviceWidgetBlueprintClass(nullptr)
 {
-	// Initialize Variables
+	static ConstructorHelpers::FClassFinder<APawn> Player(
+		TEXT("/Game/Blueprints/Ball/BP_Ball.BP_Ball"));
+	if (Player.Class != nullptr)
+	{
+		DefaultPawnClass = Player.Class;
+	}
+	PlayerControllerClass = APlayerController::StaticClass();
 }
 
 void ABallGameGameModeBase::BeginPlay()
@@ -111,7 +117,7 @@ ABallPlayerController* ABallGameGameModeBase::GetBallPlayerController()
 void ABallGameGameModeBase::GameOver()
 {
 	UE_LOG(LogTemp, Warning, TEXT("GAME OVER"));
-	UGameplayStatics::SetGamePaused(GetWorld(), true);
+	UGameplayStatics::OpenLevel(GetWorld(), "IntroLevel");
 }
 
 void ABallGameGameModeBase::LevelComplete()
