@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/BallGameHUD.h"
 
-ABallGameGameModeBase::ABallGameGameModeBase(): DeviceWidgetBlueprintClass(nullptr)
+ABallGameGameModeBase::ABallGameGameModeBase()
 {
 	static ConstructorHelpers::FClassFinder<APawn> Player(
 		TEXT("/Game/Blueprints/Ball/BP_Ball.BP_Ball"));
