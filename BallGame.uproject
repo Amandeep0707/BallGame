@@ -37,6 +37,13 @@
 		{
 			"Name": "PSOnScreenControllerOverlay",
 			"Enabled": false
+		},
+		{
+			"Name": "GameInput",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
 		}
 	],
 	"TargetPlatforms": [
