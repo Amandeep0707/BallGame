@@ -10,13 +10,6 @@
 
 ABallGameGameModeBase::ABallGameGameModeBase()
 {
-	static ConstructorHelpers::FClassFinder<APawn> Player(
-		TEXT("/Game/Blueprints/Ball/BP_Ball.BP_Ball"));
-	if (Player.Class != nullptr)
-	{
-		DefaultPawnClass = Player.Class;
-	}
-	PlayerControllerClass = APlayerController::StaticClass();
 }
 
 void ABallGameGameModeBase::BeginPlay()
@@ -35,8 +28,10 @@ void ABallGameGameModeBase::PlayerFell()
 {
 	CurrentPlayerLives--;
 
+	UE_LOG(LogTemp, Log, TEXT("Called Player Fell"));
+
 	// Update Player Remaining Lives in HUD
-	if (GetBallGameHUD()) CachedHUDRef->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);CachedHUDRef->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
+	if (GetBallGameHUD()) CachedHUDRef->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
 
 	if (CurrentPlayerLives > 0)
 	{
@@ -50,7 +45,8 @@ void ABallGameGameModeBase::PlayerFell()
 	}
 	else
 	{
-		GameOver();
+		// GameOver();
+		UE_LOG(LogTemp, Log, TEXT("Called GameOver"));
 	}
 }
 

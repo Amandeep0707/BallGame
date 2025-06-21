@@ -92,8 +92,8 @@ void ABall::StartAutoPilot(const FVector& TargetLocation, AActor* Requester)
 	AutoPilotTargetLocation = TargetLocation;
 	AutoPilotRequester = Requester;
 
-	// SimSphere->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	// SimSphere->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+	SimSphere->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	SimSphere->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 }
 
 void ABall::StopAutoPilot()
@@ -132,9 +132,9 @@ void ABall::UpdateAutoPilot(float DeltaTime)
 		SimSphere->SetSimulatePhysics(false);
 		SetActorLocation(AutoPilotTargetLocation); // Snap to the final position
 
-		// Start a 3-second timer to wait for VFX, etc.
+		// Start a 1-second timer to wait for VFX, etc.
 		// After the timer, StopAutoPilot will be called.
-		GetWorld()->GetTimerManager().SetTimer(SettleTimerHandle, this, &ABall::StopAutoPilot, 3.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(SettleTimerHandle, this, &ABall::StopAutoPilot, 1.0f, false);
 	}
 	else
 	{

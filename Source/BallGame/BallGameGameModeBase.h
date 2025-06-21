@@ -44,7 +44,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Game Rules")
 	int32 StartingPlayerLives = 3;
 
-	int32 CurrentPlayerLives;
+	int32 CurrentPlayerLives = 3;
 
 	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
 	ABall* GetBallPawn();

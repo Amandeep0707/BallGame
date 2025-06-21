@@ -44,8 +44,8 @@ void ACheckpoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 			// Tell the GameMode to update the last checkpoint transform
 			GameMode->UpdateCheckpoint(SnapPoint->GetComponentLocation());
 
-			// Tell the ball to move to our snap point
-			Ball->StartAutoPilot(SnapPoint->GetComponentLocation(), this);
+			// Tell the ball to move to our snap point (Currently turned off)
+			// Ball->StartAutoPilot(SnapPoint->GetComponentLocation(), this);
 
 			// Deactivate this trigger to prevent it from firing again immediately
 			TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
