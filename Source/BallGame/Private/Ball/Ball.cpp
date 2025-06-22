@@ -147,7 +147,7 @@ void ABall::UpdateAutoPilot(float DeltaTime)
         
 		// Proportional Force: Pulls the ball towards the target. Stronger when further away.
 		const FVector ForceDirection = (AutoPilotTargetLocation - CurrentLocation).GetSafeNormal();
-		const FVector ProportionalForce = ForceDirection * Props.ForceMultiplier * AutoPilotStrengthMultiplier;
+		const FVector ProportionalForce = ForceDirection * Props.ForceMultiplier * AutoPilotStrengthMultiplier * FVector(1.f, 1.f, 0.f);
 
 		// Derivative Force: Acts as a brake. Pushes against the current velocity to prevent overshooting.
 		const FVector DampingForce = -SimSphere->GetPhysicsLinearVelocity() * AutoPilotDampingMultiplier * Props.LinearDamping;

@@ -22,6 +22,9 @@ void ABallGameGameModeBase::BeginPlay()
 	{
 		LastCheckpointLocation = PlayerPawn->GetActorLocation();
 	}
+
+	GetWorld()->Exec(GetWorld(), TEXT("r.ScreenPercentage 100"));
+	GetWorld()->Exec(GetWorld(), TEXT("r.VSync 1"));
 }
 
 void ABallGameGameModeBase::PlayerFell()
