@@ -16,6 +16,7 @@
 ABall::ABall()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bAsyncPhysicsTickEnabled = true;
 
 	SimSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SetRootComponent(SimSphere);
@@ -29,6 +30,8 @@ ABall::ABall()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->TargetArmLength = 350.f;
+	SpringArm->SocketOffset = FVector(0.f, 0.f, SpringArm->TargetArmLength * 1.285f);
 
 	Camera = CreateDefaultSubobject<UCineCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
@@ -80,7 +83,6 @@ void ABall::Tick(float DeltaTime)
 	SetRollAudioIntensity();
 
 	FloorTrace();
-	
 }
 
 void ABall::StartAutoPilot(const FVector& TargetLocation, AActor* Requester)
@@ -92,8 +94,8 @@ void ABall::StartAutoPilot(const FVector& TargetLocation, AActor* Requester)
 	AutoPilotTargetLocation = TargetLocation;
 	AutoPilotRequester = Requester;
 
-	SimSphere->SetPhysicsLinearVelocity(FVector::ZeroVector);
-	SimSphere->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+	// SimSphere->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	// SimSphere->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 }
 
 void ABall::StopAutoPilot()
@@ -145,7 +147,7 @@ void ABall::UpdateAutoPilot(float DeltaTime)
         
 		// Proportional Force: Pulls the ball towards the target. Stronger when further away.
 		const FVector ForceDirection = (AutoPilotTargetLocation - CurrentLocation).GetSafeNormal();
-		const FVector ProportionalForce = ForceDirection * Props.ForceMultiplier;
+		const FVector ProportionalForce = ForceDirection * Props.ForceMultiplier * AutoPilotStrengthMultiplier;
 
 		// Derivative Force: Acts as a brake. Pushes against the current velocity to prevent overshooting.
 		const FVector DampingForce = -SimSphere->GetPhysicsLinearVelocity() * AutoPilotDampingMultiplier * Props.LinearDamping;
@@ -183,6 +185,14 @@ void ABall::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookVector.X);
 		// AddControllerPitchInput(LookVector.Y);
 	}
+}
+
+void ABall::Zoom(const FInputActionValue& Value)
+{
+	float ZoomValue = Value.Get<float>();
+	SpringArm->TargetArmLength += ZoomValue;
+	SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength, 250.f, 500.f);
+	SpringArm->SocketOffset = FVector(0.f, 0.f, SpringArm->TargetArmLength * 1.285f);
 }
 
 void ABall::ChangeMaterial(EBallMaterial NewMaterial)
@@ -291,8 +301,8 @@ void ABall::OnBallHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 
 bool ABall::FloorTrace()
 {
-	const FVector TraceStart = SimSphere->GetComponentLocation() + FVector(0.f, 0.f, BallRadius);
-	const float TraceDistance = 2.f * BallRadius + 10.f;
+	const FVector TraceStart = SimSphere->GetComponentLocation();
+	const float TraceDistance = 2.f * BallRadius;
 	const FVector TraceEnd = TraceStart - FVector(0.f, 0.f, TraceDistance);
 	TArray<AActor*> IgnoredActors;
 	IgnoredActors.Add(GetOwner());

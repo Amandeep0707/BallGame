@@ -22,7 +22,6 @@ public:
 
 	// --- Getter Functions ---
 	FORCEINLINE int32 GetCurrentPlayerLives() const { return StartingPlayerLives; }
-
 	
 	UPROPERTY(BlueprintReadOnly, Category = "GameData")
 	TObjectPtr<ABall> CachedBallRef;

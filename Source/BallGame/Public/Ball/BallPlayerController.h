@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BallPlayerController.generated.h"
 
+class ABall;
 class ABallGameHUD;
 class UInputMappingContext;
 class UInputAction;
@@ -31,6 +32,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Inputs)
 	UInputMappingContext* MenuMappingContext;
 
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
+	TObjectPtr<ABall> CachedBallRef;
+
+	UPROPERTY(BlueprintReadOnly, Category = "GameData")
+	TObjectPtr<ABallGameHUD> CachedHUDRef;
+
 	UPROPERTY(EditAnywhere, Category = Inputs)
 	UInputAction* IA_Move;
 
@@ -38,13 +45,24 @@ protected:
 	UInputAction* IA_Look;
 
 	UPROPERTY(EditAnywhere, Category = Inputs)
+	UInputAction* IA_Zoom;
+
+	UPROPERTY(EditAnywhere, Category = Inputs)
 	UInputAction* IA_Pause;
+
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABall* GetBallPawn();
+	
+	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
+	ABallGameHUD* GetBallGameHUD();
 	
 	void Move(const FInputActionValue& Value);
 	
 	void Look(const FInputActionValue& Value);
 	
 	void Paused(const FInputActionValue& Value);
+
+	void Zoom(const FInputActionValue& Value);
 
 private:
 	

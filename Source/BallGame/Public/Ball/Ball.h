@@ -38,10 +38,12 @@ public:
 	/** Returns true if the ball is currently in an automated movement sequence. */
 	FORCEINLINE bool IsAutoPiloting() const { return bIsAutoPiloting; }
 	
-	//Custom Functions
+	//Input Functions
 	void Move(const FInputActionValue& Value);
 
 	void Look(const FInputActionValue& Value);
+
+	void Zoom(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Ball Parameters | Material")
 	void ChangeMaterial(EBallMaterial NewMaterial);
