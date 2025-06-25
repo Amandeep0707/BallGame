@@ -16,7 +16,6 @@
 ABall::ABall()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	bAsyncPhysicsTickEnabled = true;
 
 	SimSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SetRootComponent(SimSphere);
@@ -118,6 +117,8 @@ void ABall::StopAutoPilot()
 
 	// Clear the timer just in case
 	GetWorld()->GetTimerManager().ClearTimer(SettleTimerHandle);
+	if (GameMode) GameMode->ResumeGameTicker();
+	AutoPilotRequester = nullptr;
 }
 
 void ABall::UpdateAutoPilot(float DeltaTime)
@@ -281,6 +282,10 @@ void ABall::ApplyMaterialProperties()
 	SimSphere->SetLinearDamping(Props.LinearDamping);
 	SimSphere->SetAngularDamping(Props.AngularDamping);
 	SimSphere->SetPhysMaterialOverride(Props.PhysicsMaterial);
+
+	// Set Audio
+	RollAudio->Sound = Props.RollSound;
+	HitAudio->Sound = Props.HitSound;
 	
 	// We can also update our gameplay variables
 	ForceMultiplier = Props.ForceMultiplier;

@@ -7,31 +7,78 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/BallGameHUD.h"
+#include "World/BallPlayerState.h"
 
-ABallGameGameModeBase::ABallGameGameModeBase()
+ABallGameGameModeBase::ABallGameGameModeBase(): LastCheckpointLocation(FVector::ZeroVector)
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
+	DefaultPawnClass = ABall::StaticClass();
+	PlayerControllerClass = ABallPlayerController::StaticClass();
+	PlayerStateClass = ABallPlayerState::StaticClass();
 }
 
 void ABallGameGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	bIsScoreTicking = true;
+	ScoreTickTimer = 0.0f;
 	CurrentPlayerLives = StartingPlayerLives;
 	
-	if (const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0))
+	if (GetBallPawn())
 	{
-		LastCheckpointLocation = PlayerPawn->GetActorLocation();
+		LastCheckpointLocation = CachedBallRef->GetActorLocation();
 	}
 
 	GetWorld()->Exec(GetWorld(), TEXT("r.ScreenPercentage 100"));
 	GetWorld()->Exec(GetWorld(), TEXT("r.VSync 1"));
 }
 
+void ABallGameGameModeBase::ResumeGameTicker()
+{
+	bIsScoreTicking = true;
+	ScoreTickTimer = 0.0f;
+}
+
+void ABallGameGameModeBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bIsScoreTicking)
+	{
+		ScoreTickTimer += DeltaSeconds;
+		if (ScoreTickTimer >= ScoreTickInterval)
+		{
+			
+			// Reset timer, accounting for any leftover time.
+			ScoreTickTimer -= ScoreTickInterval;
+            
+			if (GetBallPlayerController())
+			{
+				if (ABallPlayerState* PS = CachedPlayerControllerRef->GetPlayerState<ABallPlayerState>())
+				{
+					PS->DecrementSessionScore(ScoreToDecrementPerTick);
+				}
+			}
+		}
+	}
+}
+
 void ABallGameGameModeBase::PlayerFell()
 {
+	// bIsScoreTicking = false; // Stop the clock while we respawn
 	CurrentPlayerLives--;
 
-	UE_LOG(LogTemp, Log, TEXT("Called Player Fell"));
+	if (GetBallPlayerController())
+	{
+		if (ABallPlayerState* PS = CachedPlayerControllerRef->GetPlayerState<ABallPlayerState>())
+		{
+			// Apply penalty and reset session progress
+			PS->AddToSessionScore(-LifeLostPenalty); // Subtract penalty
+			PS->ResetSessionScore();
+		}
+	}
 
 	// Update Player Remaining Lives in HUD
 	if (GetBallGameHUD()) CachedHUDRef->PlayerLivesUpdate.Broadcast(CurrentPlayerLives);
@@ -51,11 +98,23 @@ void ABallGameGameModeBase::PlayerFell()
 		// GameOver();
 		UE_LOG(LogTemp, Log, TEXT("Called GameOver"));
 	}
+
+	ResumeGameTicker(); // Start the clock again.
 }
 
-void ABallGameGameModeBase::UpdateCheckpoint(const FVector& NewCheckpointTransform)
+void ABallGameGameModeBase::HandleCheckpointReached(const FVector& RespawnLocation)
 {
-	LastCheckpointLocation = NewCheckpointTransform;
+	// bIsScoreTicking = false; // Stop the clock! The player is safe.
+	LastCheckpointLocation = RespawnLocation;
+
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+	{
+		if (ABallPlayerState* PS = PC->GetPlayerState<ABallPlayerState>())
+		{
+			PS->BankSessionScore();
+			ResumeGameTicker();
+		}
+	}
 }
 
 ABall* ABallGameGameModeBase::GetBallPawn()

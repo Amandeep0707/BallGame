@@ -42,7 +42,7 @@ void ACheckpoint::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		if (ABallGameGameModeBase* GameMode = Cast<ABallGameGameModeBase>(UGameplayStatics::GetGameMode(GetWorld())))
 		{
 			// Tell the GameMode to update the last checkpoint transform
-			GameMode->UpdateCheckpoint(SnapPoint->GetComponentLocation());
+			GameMode->HandleCheckpointReached(SnapPoint->GetComponentLocation());
 
 			// Tell the ball to move to our snap point (Currently turned off)
 			// Ball->StartAutoPilot(SnapPoint->GetComponentLocation(), this);

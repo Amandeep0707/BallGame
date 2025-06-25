@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
 #include "GameplayWidget.generated.h"
 
 class ABall;
@@ -25,12 +26,14 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	//Custom Variables
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ball Stats")
-	float DistanceTravelled = 0.f;
-
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Ball Stats")
 	float MaxVelocity = 0.f;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ScoreText;
+
+	UFUNCTION()
+	void OnScoreChanged(int32 NewScore);
 
 protected:
 

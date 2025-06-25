@@ -32,6 +32,12 @@ struct FBallMaterialProperties
 	UPhysicalMaterial* PhysicsMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")
+	USoundBase* RollSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")
+	USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")
 	float MassScale = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material Properties")

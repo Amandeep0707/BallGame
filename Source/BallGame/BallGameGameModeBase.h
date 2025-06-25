@@ -18,7 +18,11 @@ class BALLGAME_API ABallGameGameModeBase : public AGameModeBase
 public:
 	
 	ABallGameGameModeBase();
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
+
+	// Called by the Ball after its autopilot finishes, to resume the game's clock.
+	void ResumeGameTicker();
 
 	// --- Getter Functions ---
 	FORCEINLINE int32 GetCurrentPlayerLives() const { return StartingPlayerLives; }
@@ -36,7 +40,20 @@ public:
 	FVector LastCheckpointLocation;
 
 	void PlayerFell();
-	void UpdateCheckpoint(const FVector& NewCheckpointTransform);
+	void HandleCheckpointReached(const FVector& RespawnLocation);
+
+protected:
+
+	// --- SCORING RULES ---
+    
+	UPROPERTY(EditDefaultsOnly, Category = "Game Rules|Scoring")
+	float ScoreTickInterval = 1.0f; // How often (in seconds) the score ticks down.
+
+	UPROPERTY(EditDefaultsOnly, Category = "Game Rules|Scoring")
+	int32 ScoreToDecrementPerTick = 1; // How much score is lost per tick.
+    
+	UPROPERTY(EditDefaultsOnly, Category = "Game Rules|Scoring")
+	int32 LifeLostPenalty = 200; // Score penalty for falling.
 
 private:
 
@@ -44,6 +61,9 @@ private:
 	int32 StartingPlayerLives = 3;
 
 	int32 CurrentPlayerLives = 3;
+	
+	float ScoreTickTimer;
+	bool bIsScoreTicking;
 
 	UFUNCTION(BlueprintCallable, Category = "Game Mode|References")
 	ABall* GetBallPawn();
